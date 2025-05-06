@@ -34,8 +34,8 @@ var AppConfig struct {
 // LoadConfig loads the application configuration from environment variables
 func LoadConfig() {
 	// Set server configuration
-	AppConfig.Server.Port = getEnvWithDefault("PORT", "5000")
-	AppConfig.Server.Host = getEnvWithDefault("HOST", "localhost")
+	AppConfig.Server.Port = getEnvWithDefault("PORT", "10000")
+	AppConfig.Server.Host = getEnvWithDefault("HOST", "0.0.0.0")
 
 	// Set database configuration
 	AppConfig.Database.DSN = getEnvWithDefault("DATABASE_URL", "")
