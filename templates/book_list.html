@@ -1,0 +1,91 @@
+{{ define "content" }}
+<div class="book-list">
+    <div class="page-header">
+        <h2>Book Catalog</h2>
+        {{ if .User.IsLibrarian }}
+        <a href="/books/new" class="btn btn-primary">Add New Book</a>
+        {{ end }}
+    </div>
+
+    <div class="search-box">
+        <form action="/books" method="get">
+            <div class="form-group">
+                <input type="text" name="search" placeholder="Search books..." value="{{ .Data.Search }}">
+                <select name="searchBy">
+                    <option value="title" {{ if eq .Data.SearchBy "title" }}selected{{ end }}>Title</option>
+                    <option value="author" {{ if eq .Data.SearchBy "author" }}selected{{ end }}>Author</option>
+                    <option value="genre" {{ if eq .Data.SearchBy "genre" }}selected{{ end }}>Genre</option>
+                    <option value="isbn" {{ if eq .Data.SearchBy "isbn" }}selected{{ end }}>ISBN</option>
+                </select>
+                <button type="submit" class="btn">Search</button>
+                {{ if .Data.Search }}
+                <a href="/books" class="btn btn-sm">Clear</a>
+                {{ end }}
+            </div>
+        </form>
+    </div>
+
+    {{ if len .Data.Books }}
+    <div class="books-grid">
+        {{ range .Data.Books }}
+        <div class="book-card">
+            <div class="book-info">
+                <h3><a href="/books/{{ .ID }}">{{ .Title }}</a></h3>
+                <p class="author">by {{ .Author }}</p>
+                <p class="genre">{{ .Genre }}</p>
+                <p class="status {{ if gt .AvailableCopy 0 }}available{{ else }}unavailable{{ end }}">
+                    {{ if gt .AvailableCopy 0 }}
+                        Available ({{ .AvailableCopy }}/{{ .TotalCopies }})
+                    {{ else }}
+                        Not Available
+                    {{ end }}
+                </p>
+            </div>
+            <div class="book-actions">
+                <a href="/books/{{ .ID }}" class="btn btn-sm">Details</a>
+                {{ if $.User.IsLibrarian }}
+                <a href="/books/{{ .ID }}/edit" class="btn btn-sm">Edit</a>
+                {{ end }}
+                {{ if and $.User.IsStudent (gt .AvailableCopy 0) }}
+                <form action="/books/{{ .ID }}/borrow" method="post">
+                    <input type="hidden" name="book_id" value="{{ .ID }}">
+                    <button type="submit" class="btn btn-sm">Borrow</button>
+                </form>
+                {{ end }}
+            </div>
+        </div>
+        {{ end }}
+    </div>
+
+    <!-- Pagination -->
+    {{ if gt .Data.TotalPages 1 }}
+    <div class="pagination">
+        {{ if gt .Data.Page 1 }}
+        <a href="/books?page={{ sub .Data.Page 1 }}&search={{ .Data.Search }}&searchBy={{ .Data.SearchBy }}" class="btn btn-sm">&laquo; Previous</a>
+        {{ end }}
+        
+        {{ $currentPage := .Data.Page }}
+        {{ range $i := seq 1 .Data.TotalPages }}
+            {{ if eq $i $currentPage }}
+            <span class="page-number current">{{ $i }}</span>
+            {{ else }}
+            <a href="/books?page={{ $i }}&search={{ $.Data.Search }}&searchBy={{ $.Data.SearchBy }}" class="page-number">{{ $i }}</a>
+            {{ end }}
+        {{ end }}
+        
+        {{ if lt .Data.Page .Data.TotalPages }}
+        <a href="/books?page={{ add .Data.Page 1 }}&search={{ .Data.Search }}&searchBy={{ .Data.SearchBy }}" class="btn btn-sm">Next &raquo;</a>
+        {{ end }}
+    </div>
+    {{ end }}
+
+    {{ else }}
+    <div class="empty-state">
+        <p>No books found.</p>
+        {{ if .Data.Search }}
+        <p>Try adjusting your search criteria or <a href="/books">view all books</a>.</p>
+        {{ end }}
+    </div>
+    {{ end }}
+</div>
+{{ end }}

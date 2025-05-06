@@ -1,0 +1,62 @@
+{{ define "content" }}
+<div class="book-details-page">
+    <div class="page-header">
+        <h2>Book Details</h2>
+        <div class="header-actions">
+            <a href="/books" class="btn">Back to Catalog</a>
+            {{ if .user.IsLibrarian }}
+            <a href="/books/{{ .book.ID }}/edit" class="btn btn-primary">Edit Book</a>
+            {{ end }}
+        </div>
+    </div>
+
+    <div class="book-details-container">
+        <div class="book-info-main">
+            <h3 class="book-title">{{ .book.Title }}</h3>
+            <p class="book-author">by {{ .book.Author }}</p>
+            
+            <div class="book-meta">
+                <p><strong>ISBN:</strong> {{ .book.ISBN }}</p>
+                <p><strong>Genre:</strong> {{ .book.Genre }}</p>
+                <p><strong>Publisher:</strong> {{ .book.Publisher }}</p>
+                <p><strong>Published Year:</strong> {{ .book.PublishedYear }}</p>
+            </div>
+            
+            <div class="book-status {{ if gt .book.AvailableCopy 0 }}available{{ else }}unavailable{{ end }}">
+                <p>
+                    <strong>Status:</strong>
+                    {{ if gt .book.AvailableCopy 0 }}
+                        Available ({{ .book.AvailableCopy }} of {{ .book.TotalCopies }} copies)
+                    {{ else }}
+                        Not Available
+                    {{ end }}
+                </p>
+            </div>
+            
+            <div class="book-description">
+                <h4>Description</h4>
+                <p>{{ .book.Description }}</p>
+            </div>
+            
+            <div class="book-actions">
+                {{ if and .user.IsStudent (gt .book.AvailableCopy 0) (not .hasPendingRequest) (not .isCurrentlyBorrowing) }}
+                <form action="/books/{{ .book.ID }}/borrow" method="post">
+                    <input type="hidden" name="book_id" value="{{ .book.ID }}">
+                    <button type="submit" class="btn btn-primary">Borrow This Book</button>
+                </form>
+                {{ else if .hasPendingRequest }}
+                <p class="info-message">You have a pending request for this book.</p>
+                {{ else if .isCurrentlyBorrowing }}
+                <p class="info-message">You are currently borrowing this book.</p>
+                <p>Due Date: {{ .activeBorrow.DueDate.Format "Jan 02, 2006" }}</p>
+                <form action="/borrows/{{ .activeBorrow.ID }}/return" method="post">
+                    <button type="submit" class="btn">Return Book</button>
+                </form>
+                {{ else if eq .book.AvailableCopy 0 }}
+                <p class="info-message">This book is currently unavailable. Please check back later.</p>
+                {{ end }}
+            </div>
+        </div>
+    </div>
+</div>
+{{ end }}

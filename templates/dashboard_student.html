@@ -1,0 +1,95 @@
+{{ define "content" }}
+<div class="dashboard">
+    <h2>Student Dashboard</h2>
+    <p>Welcome, {{ .user.Name }}!</p>
+
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <h3>Borrowed Books</h3>
+            <p class="stat-number">{{ len .borrowedBooks }}</p>
+            <a href="/my-borrows" class="btn btn-sm">View Details</a>
+        </div>
+        <div class="stat-card">
+            <h3>Pending Requests</h3>
+            <p class="stat-number">{{ len .pendingRequests }}</p>
+            <a href="/my-borrows" class="btn btn-sm">View Requests</a>
+        </div>
+        <div class="stat-card">
+            <h3>Overdue Books</h3>
+            <p class="stat-number">{{ len .overdueBooks }}</p>
+            <a href="/my-borrows" class="btn btn-sm">View Overdue</a>
+        </div>
+    </div>
+
+    <div class="dashboard-actions">
+        <h3>Quick Actions</h3>
+        <div class="action-buttons">
+            <a href="/books" class="btn btn-primary">Browse Books</a>
+            <a href="/my-borrows" class="btn btn-primary">My Borrows</a>
+            <a href="/profile" class="btn btn-primary">My Profile</a>
+        </div>
+    </div>
+
+    {{ if .borrowedBooks }}
+    <div class="dashboard-section">
+        <h3>Currently Borrowed Books</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Book Title</th>
+                    <th>Borrowed Date</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .borrowedBooks }}
+                <tr>
+                    <td>{{ .Book.Title }}</td>
+                    <td>{{ .RequestDate.Format "Jan 02, 2006" }}</td>
+                    <td>{{ if .DueDate }}{{ .DueDate.Format "Jan 02, 2006" }}{{ else }}-{{ end }}</td>
+                    <td>
+                        {{ if .IsOverdue }}
+                        <span class="status-overdue">Overdue</span>
+                        {{ else }}
+                        <span class="status-active">Active</span>
+                        {{ end }}
+                    </td>
+                    <td>
+                        <form action="/borrows/{{ .ID }}/return" method="post">
+                            <button type="submit" class="btn btn-sm">Return</button>
+                        </form>
+                    </td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </div>
+    {{ end }}
+
+    {{ if .pendingRequests }}
+    <div class="dashboard-section">
+        <h3>Pending Borrow Requests</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Book Title</th>
+                    <th>Request Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .pendingRequests }}
+                <tr>
+                    <td>{{ .Book.Title }}</td>
+                    <td>{{ .RequestDate.Format "Jan 02, 2006" }}</td>
+                    <td><span class="status-pending">Pending</span></td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </div>
+    {{ end }}
+</div>
+{{ end }}

@@ -1,0 +1,29 @@
+{{ define "content" }}
+<div class="borrow-form">
+    <div class="page-header">
+        <h2>Borrow Request</h2>
+        <a href="/books" class="btn">Back to Books</a>
+    </div>
+
+    <div class="book-details">
+        <h3>{{ .book.Title }}</h3>
+        <p>by {{ .book.Author }}</p>
+        <p>Genre: {{ .book.Genre }}</p>
+        <p>Available Copies: {{ .book.AvailableCopy }}/{{ .book.TotalCopies }}</p>
+    </div>
+
+    <form action="/books/{{ .book.ID }}/borrow" method="post">
+        <input type="hidden" name="book_id" value="{{ .book.ID }}">
+        
+        <div class="form-group">
+            <label>Confirm that you want to borrow this book:</label>
+            <p>The borrow request will be reviewed by a librarian. Once approved, you will be notified to pick up the book. The standard borrow period is 14 days from the approval date.</p>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Request Borrow</button>
+            <a href="/books/{{ .book.ID }}" class="btn">Cancel</a>
+        </div>
+    </form>
+</div>
+{{ end }}

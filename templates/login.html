@@ -1,0 +1,31 @@
+{{ define "content" }}
+<section class="auth-section">
+    <div class="auth-container">
+        <h1>Login</h1>
+        
+        <form class="auth-form" action="/login" method="post">
+            {{ if index .Data "Redirect" }}
+                <input type="hidden" name="redirect" value="{{ index .Data "Redirect" }}">
+            {{ end }}
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="form-buttons">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+            
+            <div class="auth-links">
+                <p>Don't have an account? <a href="/register">Register</a></p>
+            </div>
+        </form>
+    </div>
+</section>
+{{ end }}

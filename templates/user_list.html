@@ -1,0 +1,94 @@
+{{ define "content" }}
+<div class="user-list">
+    <div class="page-header">
+        <h2>User Management</h2>
+        <a href="/users/add" class="btn btn-primary">Add New User</a>
+    </div>
+
+    <div class="search-box">
+        <form action="/users" method="get">
+            <div class="form-group">
+                <input type="text" name="search" placeholder="Search users..." value="{{ with index .Data "Search" }}{{ . }}{{ end }}">
+                <select name="role">
+                    <option value="">All Roles</option>
+                    <option value="student" {{ with index .Data "Role" }}{{ if eq . "student" }}selected{{ end }}{{ end }}>Students</option>
+                    <option value="librarian" {{ with index .Data "Role" }}{{ if eq . "librarian" }}selected{{ end }}{{ end }}>Librarians</option>
+                </select>
+                <button type="submit" class="btn">Search</button>
+                {{ $search := index .Data "Search" }}
+                {{ $role := index .Data "Role" }}
+                {{ if or $search $role }}
+                <a href="/users" class="btn btn-sm">Clear</a>
+                {{ end }}
+            </div>
+        </form>
+    </div>
+
+    {{ $users := index .Data "Users" }}
+    {{ if and $users (gt (len $users) 0) }}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Student ID</th>
+                <th>Role</th>
+                <th>Phone</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range $users }}
+            <tr>
+                <td>{{ .Name }}</td>
+                <td>{{ .Email }}</td>
+                <td>{{ if .StudentID.Valid }}{{ .StudentID.String }}{{ end }}</td>
+                <td>{{ .Role }}</td>
+                <td>{{ if .Phone.Valid }}{{ .Phone.String }}{{ end }}</td>
+                <td class="actions">
+                    <a href="/profile/{{ .ID }}" class="btn btn-sm">View</a>
+                    <a href="/users/edit/{{ .ID }}" class="btn btn-sm">Edit</a>
+                    {{ if ne .ID $.User.ID }}
+                    <form action="/users/delete/{{ .ID }}" method="post" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                    {{ end }}
+                </td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {{ $totalPages := index .Data "TotalPages" }}
+    {{ $page := index .Data "Page" }}
+    {{ if and $totalPages $page (gt $totalPages 1) }}
+    <div class="pagination">
+        {{ if gt $page 1 }}
+        <a href="/users?page={{ sub $page 1 }}&search={{ with index .Data "Search" }}{{ . }}{{ end }}&role={{ with index .Data "Role" }}{{ . }}{{ end }}" class="btn btn-sm">&laquo; Previous</a>
+        {{ end }}
+        
+        {{ range $i := seq 1 $totalPages }}
+            {{ if eq $i $page }}
+            <span class="page-number current">{{ $i }}</span>
+            {{ else }}
+            <a href="/users?page={{ $i }}&search={{ with index $.Data "Search" }}{{ . }}{{ end }}&role={{ with index $.Data "Role" }}{{ . }}{{ end }}" class="page-number">{{ $i }}</a>
+            {{ end }}
+        {{ end }}
+        
+        {{ if lt $page $totalPages }}
+        <a href="/users?page={{ add $page 1 }}&search={{ with index .Data "Search" }}{{ . }}{{ end }}&role={{ with index .Data "Role" }}{{ . }}{{ end }}" class="btn btn-sm">Next &raquo;</a>
+        {{ end }}
+    </div>
+    {{ end }}
+
+    {{ else }}
+    <div class="empty-state">
+        <p>No users found.</p>
+        {{ if or $search $role }}
+        <p>Try adjusting your search criteria or <a href="/users">view all users</a>.</p>
+        {{ end }}
+    </div>
+    {{ end }}
+</div>
+{{ end }}

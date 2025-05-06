@@ -1,0 +1,156 @@
+{{ define "content" }}
+<div class="borrow-list">
+    <div class="page-header">
+        <h2>Borrow Management</h2>
+        <div class="header-actions">
+            <a href="/borrow-history" class="btn">View History</a>
+            <a href="/borrow-report" class="btn">View Reports</a>
+        </div>
+    </div>
+
+    <div class="search-box">
+        <form action="/borrows" method="get">
+            <div class="form-group">
+                <input type="text" name="search" placeholder="Search by book title, student name..." value="{{ index .Data "search" }}">
+                <select name="status">
+                    <option value="">All Status</option>
+                    <option value="pending" {{ if eq (index .Data "status") "pending" }}selected{{ end }}>Pending</option>
+                    <option value="approved" {{ if eq (index .Data "status") "approved" }}selected{{ end }}>Approved</option>
+                    <option value="rejected" {{ if eq (index .Data "status") "rejected" }}selected{{ end }}>Rejected</option>
+                    <option value="returned" {{ if eq (index .Data "status") "returned" }}selected{{ end }}>Returned</option>
+                </select>
+                <button type="submit" class="btn">Search</button>
+                {{ if or (index .Data "search") (index .Data "status") }}
+                <a href="/borrows" class="btn btn-sm">Clear</a>
+                {{ end }}
+            </div>
+        </form>
+    </div>
+
+    {{ if index .Data "borrows" }}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Book</th>
+                <th>Student</th>
+                <th>Request Date</th>
+                <th>Status</th>
+                <th>Due Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range index .Data "borrows" }}
+            <tr class="{{ if eq .Status "pending" }}pending{{ else if .IsOverdue }}overdue{{ end }}">
+                <td>{{ .Book.Title }}</td>
+                <td>{{ .User.Name }} ({{ .User.StudentID }})</td>
+                <td>{{ .CreatedAt.Format "Jan 02, 2006" }}</td>
+                <td>
+                    {{ if eq .Status "pending" }}
+                    <span class="status-pending">Pending</span>
+                    {{ else if eq .Status "approved" }}
+                        {{ if .IsOverdue }}
+                        <span class="status-overdue">Overdue</span>
+                        {{ else }}
+                        <span class="status-approved">Approved</span>
+                        {{ end }}
+                    {{ else if eq .Status "rejected" }}
+                    <span class="status-rejected">Rejected</span>
+                    {{ else if eq .Status "returned" }}
+                    <span class="status-returned">Returned</span>
+                    {{ end }}
+                </td>
+                <td>
+                    {{ if .DueDate }}
+                    {{ .DueDate.Format "Jan 02, 2006" }}
+                    {{ else }}
+                    -
+                    {{ end }}
+                </td>
+                <td class="actions">
+                    {{ if eq .Status "pending" }}
+                    <button class="btn btn-sm" onclick="showApproveForm({{ .ID }})">Approve</button>
+                    <div class="approve-form" id="approve-form-{{ .ID }}" style="display: none;">
+                        <form action="/borrows/{{ .ID }}/action" method="post">
+                            <input type="hidden" name="action" value="approve">
+                            <div class="form-group">
+                                <label for="due_date">Due Date:</label>
+                                <input type="date" name="due_date" required min="{{ now.Format "2006-01-02" }}" value="{{ now.AddDate 0 0 14 | formatDate }}">
+                                <small class="form-text">Default: 14 days from today</small>
+                            </div>
+                            <button type="submit" class="btn btn-sm">Confirm Approve</button>
+                            <button type="button" class="btn btn-sm" onclick="hideApproveForm({{ .ID }})">Cancel</button>
+                        </form>
+                    </div>
+                    <button class="btn btn-sm btn-danger" onclick="showRejectForm({{ .ID }})">Reject</button>
+                    <div class="reject-form" id="reject-form-{{ .ID }}" style="display: none;">
+                        <form action="/borrows/{{ .ID }}/action" method="post">
+                            <input type="hidden" name="action" value="reject">
+                            <textarea name="rejection_note" placeholder="Reason for rejection (optional)" rows="2"></textarea>
+                            <button type="submit" class="btn btn-sm btn-danger">Confirm Reject</button>
+                            <button type="button" class="btn btn-sm" onclick="hideRejectForm({{ .ID }})">Cancel</button>
+                        </form>
+                    </div>
+                    {{ else if eq .Status "approved" }}
+                    <form action="/borrows/{{ .ID }}/return" method="post">
+                        <button type="submit" class="btn btn-sm">Mark as Returned</button>
+                    </form>
+                    {{ else }}
+                    <a href="/borrow-history?book_id={{ .BookID }}&user_id={{ .UserID }}" class="btn btn-sm">View History</a>
+                    {{ end }}
+                </td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {{ if gt (index .Data "totalPages") 1 }}
+    <div class="pagination">
+        {{ if gt (index .Data "page") 1 }}
+        <a href="/borrows?page={{ sub (index .Data "page") 1 }}&search={{ index .Data "search" }}&status={{ index .Data "status" }}" class="btn btn-sm">&laquo; Previous</a>
+        {{ end }}
+        
+        {{ $currentPage := index .Data "page" }}
+        {{ range $i := seq 1 (index .Data "totalPages") }}
+            {{ if eq $i $currentPage }}
+            <span class="page-number current">{{ $i }}</span>
+            {{ else }}
+            <a href="/borrows?page={{ $i }}&search={{ index $.Data "search" }}&status={{ index $.Data "status" }}" class="page-number">{{ $i }}</a>
+            {{ end }}
+        {{ end }}
+        
+        {{ if lt (index .Data "page") (index .Data "totalPages") }}
+        <a href="/borrows?page={{ add (index .Data "page") 1 }}&search={{ index .Data "search" }}&status={{ index .Data "status" }}" class="btn btn-sm">Next &raquo;</a>
+        {{ end }}
+    </div>
+    {{ end }}
+
+    {{ else }}
+    <div class="empty-state">
+        <p>No borrow records found.</p>
+        {{ if or (index .Data "search") (index .Data "status") }}
+        <p>Try adjusting your search criteria or <a href="/borrows">view all records</a>.</p>
+        {{ end }}
+    </div>
+    {{ end }}
+</div>
+
+<script>
+    function showApproveForm(id) {
+        document.getElementById('approve-form-' + id).style.display = 'block';
+    }
+    
+    function hideApproveForm(id) {
+        document.getElementById('approve-form-' + id).style.display = 'none';
+    }
+    
+    function showRejectForm(id) {
+        document.getElementById('reject-form-' + id).style.display = 'block';
+    }
+    
+    function hideRejectForm(id) {
+        document.getElementById('reject-form-' + id).style.display = 'none';
+    }
+</script>
+{{ end }}

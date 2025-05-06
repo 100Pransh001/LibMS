@@ -1,0 +1,158 @@
+{{ define "content" }}
+<div class="book-detail">
+    <div class="page-header">
+        <h2>{{ .Data.Book.Title }}</h2>
+        {{ if and .User .User.IsLibrarian }}
+        <div class="admin-actions">
+            <a href="/books/{{ .Data.Book.ID }}/edit" class="btn btn-primary">Edit Book</a>
+            {{ if not .Data.HasActiveBorrows }}
+            <form action="/books/{{ .Data.Book.ID }}/delete" method="post" class="inline-form" onsubmit="return confirm('Are you sure you want to delete this book?');">
+                <button type="submit" class="btn btn-danger">Delete Book</button>
+            </form>
+            {{ end }}
+        </div>
+        {{ end }}
+    </div>
+
+    <div class="book-info-container">
+        <div class="book-details">
+            <div class="detail-item">
+                <span class="label">Author:</span>
+                <span class="value">{{ .Data.Book.Author }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">ISBN:</span>
+                <span class="value">{{ .Data.Book.ISBN }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Publisher:</span>
+                <span class="value">{{ .Data.Book.Publisher }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Publication Year:</span>
+                <span class="value">{{ .Data.Book.PublicationYear }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Category:</span>
+                <span class="value">{{ .Data.Book.Category }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">Availability:</span>
+                <span class="value {{ if gt .Data.Book.Available 0 }}available{{ else }}unavailable{{ end }}">
+                    {{ if gt .Data.Book.Available 0 }}
+                        Available ({{ .Data.Book.Available }}/{{ .Data.Book.Quantity }})
+                    {{ else }}
+                        Not Available
+                    {{ end }}
+                </span>
+            </div>
+            <div class="detail-item description">
+                <span class="label">Description:</span>
+                <span class="value">{{ .Data.Book.Description }}</span>
+            </div>
+        </div>
+
+        <div class="book-actions">
+            {{ if .User }}
+                {{ if and .User .User.IsStudent }}
+                    {{ if gt .Data.Book.Available 0 }}
+                        {{ if .Data.IsCurrentlyBorrowing }}
+                            <div class="currently-borrowing">
+                                <p>You are currently borrowing this book.</p>
+                                <p>Due date: {{ .Data.CurrentBorrow.DueDate.Format "January 2, 2006" }}</p>
+                                <form action="/books/{{ .Data.Book.ID }}/return" method="post">
+                                    <button type="submit" class="btn btn-primary">Return Book</button>
+                                </form>
+                            </div>
+                        {{ else if .Data.HasPendingRequest }}
+                            <div class="pending-request">
+                                <p>You have a pending borrow request for this book.</p>
+                            </div>
+                        {{ else }}
+                            <form action="/books/{{ .Data.Book.ID }}/borrow" method="post">
+                                <button type="submit" class="btn btn-primary">Borrow Book</button>
+                            </form>
+                        {{ end }}
+                    {{ else }}
+                        <p>This book is currently not available for borrowing.</p>
+                        {{ if index .Data "HasActiveReservation" }}
+                            <div class="reservation-status">
+                                <p>You have an active reservation for this book.</p>
+                                <p>You will be notified when the book becomes available.</p>
+                                <form action="/reservations/{{ index .Data "Reservation" "ID" }}/cancel" method="post">
+                                    <button type="submit" class="btn btn-danger">Cancel Reservation</button>
+                                </form>
+                            </div>
+                        {{ else }}
+                            <form action="/books/{{ .Data.Book.ID }}/reserve" method="post">
+                                <button type="submit" class="btn btn-primary">Reserve Book</button>
+                            </form>
+                            <p class="reservation-info">Reserve this book to be notified when it becomes available.</p>
+                        {{ end }}
+                    {{ end }}
+                {{ end }}
+                
+                {{ if and .User .User.IsLibrarian }}
+                    <div class="borrow-history">
+                        <h3>Borrow History</h3>
+                        {{ if .Data.BorrowHistory }}
+                            <table class="history-table">
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Borrowed On</th>
+                                        <th>Returned On</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {{ range .Data.BorrowHistory }}
+                                    <tr>
+                                        <td>{{ .StudentName }}</td>
+                                        <td>{{ .BorrowedAt.Format "Jan 2, 2006" }}</td>
+                                        <td>
+                                            {{ if .ReturnedAt.Valid }}
+                                                {{ .ReturnedAt.Time.Format "Jan 2, 2006" }}
+                                            {{ else }}
+                                                -
+                                            {{ end }}
+                                        </td>
+                                        <td>
+                                            {{ if eq .Status "pending" }}
+                                                <span class="status pending">Pending</span>
+                                                <div class="action-buttons">
+                                                    <form action="/borrows/{{ .ID }}/approve" method="post" class="inline-form">
+                                                        <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                                                    </form>
+                                                    <form action="/borrows/{{ .ID }}/reject" method="post" class="inline-form">
+                                                        <button type="submit" class="btn btn-sm btn-danger">Reject</button>
+                                                    </form>
+                                                </div>
+                                            {{ else if eq .Status "approved" }}
+                                                <span class="status approved">Approved</span>
+                                            {{ else if eq .Status "active" }}
+                                                <span class="status active">Borrowed</span>
+                                            {{ else if eq .Status "returned" }}
+                                                <span class="status returned">Returned</span>
+                                            {{ else if eq .Status "overdue" }}
+                                                <span class="status overdue">Overdue</span>
+                                            {{ else if eq .Status "rejected" }}
+                                                <span class="status rejected">Rejected</span>
+                                            {{ end }}
+                                        </td>
+                                    </tr>
+                                    {{ end }}
+                                </tbody>
+                            </table>
+                        {{ else }}
+                            <p>No borrow history found for this book.</p>
+                        {{ end }}
+                    </div>
+                {{ end }}
+            {{ else }}
+                <p><a href="/login">Log in</a> to borrow this book.</p>
+            {{ end }}
+        </div>
+    </div>
+</div>
+{{ end }}

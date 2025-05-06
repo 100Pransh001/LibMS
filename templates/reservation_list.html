@@ -1,0 +1,87 @@
+{{ define "content" }}
+<div class="reservation-list">
+    <div class="page-header">
+        <h2>Reservation Management</h2>
+        <div class="header-actions">
+            <a href="/borrows" class="btn">View Borrows</a>
+            <a href="/books" class="btn">Book Catalog</a>
+        </div>
+    </div>
+
+    {{ if index .Data "Book" }}
+    <div class="book-info-panel">
+        <h3>Reservations for: {{ index .Data "Book" "Title" }}</h3>
+        <div class="book-details">
+            <p><strong>Author:</strong> {{ index .Data "Book" "Author" }}</p>
+            <p><strong>ISBN:</strong> {{ index .Data "Book" "ISBN" }}</p>
+            <p><strong>Genre:</strong> {{ index .Data "Book" "Genre" }}</p>
+            <p><strong>Available Copies:</strong> {{ index .Data "Book" "Available" }} of {{ index .Data "Book" "TotalCopies" }}</p>
+        </div>
+        <a href="/reservations" class="btn btn-sm">View All Reservations</a>
+    </div>
+    {{ end }}
+
+    {{ if index .Data "Reservations" }}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Student</th>
+                {{ if not (index .Data "Book") }}
+                <th>Book</th>
+                {{ end }}
+                <th>Reservation Date</th>
+                <th>Expiry Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range index .Data "Reservations" }}
+            <tr>
+                <td>{{ .User.Name }} ({{ .User.StudentID }})</td>
+                {{ if not $.Data.Book }}
+                <td><a href="/books/{{ .BookID }}">{{ .Book.Title }}</a></td>
+                {{ end }}
+                <td>{{ .ReservationDate.Format "Jan 02, 2006" }}</td>
+                <td>
+                    {{ if .ExpiryDate }}
+                    {{ .ExpiryDate.Format "Jan 02, 2006" }}
+                    {{ else }}
+                    -
+                    {{ end }}
+                </td>
+                <td>
+                    {{ if eq .Status "active" }}
+                    <span class="status-pending">Active</span>
+                    {{ else if eq .Status "fulfilled" }}
+                    <span class="status-approved">Fulfilled</span>
+                    {{ else if eq .Status "cancelled" }}
+                    <span class="status-rejected">Cancelled</span>
+                    {{ else if eq .Status "expired" }}
+                    <span class="status-overdue">Expired</span>
+                    {{ end }}
+                </td>
+                <td class="actions">
+                    {{ if eq .Status "active" }}
+                    <form action="/reservations/{{ .ID }}/fulfill" method="post">
+                        <button type="submit" class="btn btn-sm">Fulfill Now</button>
+                    </form>
+                    {{ else }}
+                    <a href="/reservations?user_id={{ .UserID }}" class="btn btn-sm">View User's Reservations</a>
+                    {{ end }}
+                </td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+    {{ else }}
+    <div class="empty-state">
+        {{ if index .Data "Book" }}
+        <p>No reservations found for this book.</p>
+        {{ else }}
+        <p>No active reservations found.</p>
+        {{ end }}
+    </div>
+    {{ end }}
+</div>
+{{ end }}

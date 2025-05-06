@@ -1,0 +1,81 @@
+{{ define "content" }}
+<div class="dashboard">
+    <h2>Librarian Dashboard</h2>
+    <p>Welcome, {{ .user.Name }}!</p>
+
+    <div class="dashboard-stats">
+        <div class="stat-card">
+            <h3>Books</h3>
+            <p class="stat-number">{{ .bookCount }}</p>
+            <a href="/books" class="btn btn-sm">Manage Books</a>
+        </div>
+        <div class="stat-card">
+            <h3>Students</h3>
+            <p class="stat-number">{{ .studentCount }}</p>
+            <a href="/users?role=student" class="btn btn-sm">Manage Students</a>
+        </div>
+        <div class="stat-card">
+            <h3>Borrowed Books</h3>
+            <p class="stat-number">{{ .borrowedBooksCount }}</p>
+            <a href="/borrows?status=approved" class="btn btn-sm">View Borrows</a>
+        </div>
+        <div class="stat-card">
+            <h3>Pending Requests</h3>
+            <p class="stat-number">{{ .pendingRequestsCount }}</p>
+            <a href="/borrows?status=pending" class="btn btn-sm">View Requests</a>
+        </div>
+    </div>
+
+    <div class="dashboard-actions">
+        <h3>Quick Actions</h3>
+        <div class="action-buttons">
+            <a href="/books/new" class="btn btn-primary">Add New Book</a>
+            <a href="/users/new" class="btn btn-primary">Add New Student</a>
+            <a href="/borrow-report" class="btn btn-primary">View Reports</a>
+        </div>
+    </div>
+
+    <div class="dashboard-recent">
+        <h3>Recent Activities</h3>
+        <div class="tabs">
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="pending-requests">Pending Requests</button>
+                <button class="tab-btn" data-tab="recent-returns">Recent Returns</button>
+            </div>
+            
+            <div class="tab-content active" id="pending-requests">
+                <!-- This would be populated with actual data in a real application -->
+                <p>No pending requests</p>
+            </div>
+            
+            <div class="tab-content" id="recent-returns">
+                <!-- This would be populated with actual data in a real application -->
+                <p>No recent returns</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Simple tab functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons and contents
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                // Add active class to clicked button
+                this.classList.add('active');
+
+                // Show corresponding content
+                const tabId = this.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+    });
+</script>
+{{ end }}

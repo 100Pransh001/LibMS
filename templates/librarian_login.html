@@ -1,0 +1,95 @@
+{{ define "content" }}
+<section class="auth-section">
+    <div class="auth-container librarian-login-container">
+        <h1>Librarian Login</h1>
+        
+        <form class="auth-form" action="/login/librarian" method="post">
+            {{ if index .Data "Redirect" }}
+                <input type="hidden" name="redirect" value="{{ index .Data "Redirect" }}">
+            {{ end }}
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required>
+            </div>
+            
+            <div class="form-buttons">
+                <button type="submit" class="btn btn-primary">Login</button>
+            </div>
+            
+            <div class="demo-credentials">
+                <div class="alert alert-info">
+                    <p><strong>Demo Credentials:</strong></p>
+                    <p>Email: <code>lib.admin@library.com</code></p>
+                    <p>Password: <code>admin123</code></p>
+                </div>
+            </div>
+            
+            <div class="auth-links">
+                <p>Are you a student? <a href="/login/student">Student Login</a></p>
+                <p><a href="/login">← Back to login selection</a></p>
+            </div>
+        </form>
+    </div>
+</section>
+
+<style>
+    .librarian-login-container {
+        border-top: 4px solid #2a9d8f;
+    }
+    
+    .librarian-login-container h1 {
+        color: #2a9d8f;
+    }
+    
+    .librarian-login-container .btn-primary {
+        background-color: #2a9d8f;
+    }
+    
+    .librarian-login-container .btn-primary:hover {
+        background-color: #238b7e;
+    }
+    
+    .auth-links {
+        margin-top: 1.5rem;
+    }
+    
+    .auth-links p {
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Demo credentials alert styling */
+    .demo-credentials {
+        margin: 1.5rem auto;
+        max-width: 500px;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+    
+    .alert-info {
+        background-color: #e3f2fd;
+        border: 1px solid #2196f3;
+        color: #0d47a1;
+    }
+    
+    .alert p {
+        margin: 0.3rem 0;
+    }
+    
+    .alert code {
+        background-color: rgba(255, 255, 255, 0.7);
+        padding: 0.2rem 0.4rem;
+        border-radius: 3px;
+        font-family: monospace;
+    }
+</style>
+{{ end }}

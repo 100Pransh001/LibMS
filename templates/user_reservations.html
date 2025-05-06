@@ -1,0 +1,66 @@
+{{ define "content" }}
+<div class="user-reservations">
+    <div class="page-header">
+        <h2>My Reservations</h2>
+        <div class="header-actions">
+            <a href="/profile" class="btn">Back to Profile</a>
+            <a href="/books" class="btn">Browse Books</a>
+        </div>
+    </div>
+
+    {{ if index .Data "Reservations" }}
+    <div class="reservation-grid">
+        {{ range index .Data "Reservations" }}
+        <div class="reservation-card {{ .Status }}">
+            <div class="book-info">
+                <h3><a href="/books/{{ .BookID }}">{{ .Book.Title }}</a></h3>
+                <p class="author">by {{ .Book.Author }}</p>
+            </div>
+            
+            <div class="reservation-details">
+                <p><strong>Status:</strong> 
+                    {{ if eq .Status "active" }}
+                    <span class="status-pending">Active</span>
+                    {{ else if eq .Status "fulfilled" }}
+                    <span class="status-approved">Fulfilled</span>
+                    {{ else if eq .Status "cancelled" }}
+                    <span class="status-rejected">Cancelled</span>
+                    {{ else if eq .Status "expired" }}
+                    <span class="status-overdue">Expired</span>
+                    {{ end }}
+                </p>
+                <p><strong>Reserved on:</strong> {{ .ReservationDate.Format "Jan 02, 2006" }}</p>
+                {{ if .ExpiryDate }}
+                <p><strong>Expires on:</strong> {{ .ExpiryDate.Format "Jan 02, 2006" }}</p>
+                {{ end }}
+                {{ if .HasFulfilledDate }}
+                <p><strong>Fulfilled on:</strong> {{ .FulfilledDate.Format "Jan 02, 2006" }}</p>
+                {{ end }}
+            </div>
+            
+            <div class="card-actions">
+                {{ if eq .Status "active" }}
+                <form action="/reservations/{{ .ID }}/cancel" method="post">
+                    <button type="submit" class="btn btn-sm btn-danger">Cancel Reservation</button>
+                </form>
+                {{ else if eq .Status "fulfilled" }}
+                <p class="info-message">Check your borrows to see the status of your request.</p>
+                {{ else if eq .Status "expired" }}
+                <p class="info-message">Your reservation expired. You can make a new reservation.</p>
+                <form action="/books/{{ .BookID }}/reserve" method="post">
+                    <button type="submit" class="btn btn-sm">Reserve Again</button>
+                </form>
+                {{ end }}
+            </div>
+        </div>
+        {{ end }}
+    </div>
+    {{ else }}
+    <div class="empty-state">
+        <p>You don't have any reservations yet.</p>
+        <p>When a book you want is not available, you can reserve it to be notified when it becomes available.</p>
+        <a href="/books" class="btn">Browse Books</a>
+    </div>
+    {{ end }}
+</div>
+{{ end }}

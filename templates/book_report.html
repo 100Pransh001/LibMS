@@ -1,0 +1,87 @@
+{{ define "content" }}
+<div class="report-page">
+    <div class="page-header">
+        <h2>Book Reports</h2>
+        <div class="header-actions">
+            <a href="/borrow-report" class="btn">Borrow Reports</a>
+            <a href="/books" class="btn">Manage Books</a>
+        </div>
+    </div>
+
+    <div class="report-dashboard">
+        <div class="report-section">
+            <h3>Top Borrowed Books</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Book Title</th>
+                        <th>Author</th>
+                        <th>Borrow Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .topBorrowedBooks }}
+                    <tr>
+                        <td><a href="/books/{{ .BookID }}">{{ .Title }}</a></td>
+                        <td>{{ .Author }}</td>
+                        <td>{{ .BorrowCount }}</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+
+        {{ if .lowAvailabilityBooks }}
+        <div class="report-section">
+            <h3>Books with Low Availability</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Book Title</th>
+                        <th>Author</th>
+                        <th>Available / Total</th>
+                        <th>Availability %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .lowAvailabilityBooks }}
+                    <tr>
+                        <td><a href="/books/{{ .ID }}">{{ .Title }}</a></td>
+                        <td>{{ .Author }}</td>
+                        <td>{{ .AvailableCopy }} / {{ .TotalCopies }}</td>
+                        <td>{{ mul (div (float64 .AvailableCopy) (float64 .TotalCopies)) 100 }}%</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+        {{ end }}
+
+        {{ if .overdueBooks }}
+        <div class="report-section">
+            <h3>Overdue Books</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Student</th>
+                        <th>Due Date</th>
+                        <th>Days Overdue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .overdueBooks }}
+                    <tr>
+                        <td>{{ .BookTitle }}</td>
+                        <td>{{ .StudentName }}</td>
+                        <td>{{ .DueDate.Format "Jan 02, 2006" }}</td>
+                        <td>{{ if .DueDate }}{{ div (sub (now.Unix) (.DueDate.Unix)) 86400 }}{{ else }}-{{ end }}</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}

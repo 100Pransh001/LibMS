@@ -1,0 +1,103 @@
+Objective:
+Create a Library Management System using Golang (Go) for backend development and PostgreSQL as the database. The frontend should be built using pure HTML with no JavaScript frameworks. The system will have two user roles: Librarian and Student, each with distinct features.
+
+Functional Requirements:
+Librarian Features:
+Manage Books:
+
+Add new books to the library system.
+
+Update existing book information (title, author, genre, availability).
+
+Delete books from the system.
+
+Manage Student Records:
+
+Add, update, or delete student records (name, contact information, student ID).
+
+Book Borrowing Management:
+
+Approve or reject student requests to borrow books.
+
+Track borrowed books and their due dates.
+
+View the history of borrowed and returned books.
+
+Reports and Tracking:
+
+View lists of all borrowed books, both currently borrowed and returned, with timestamps.
+
+Student Features:
+Browse/Search Books:
+
+Browse all available books in the library.
+
+Search for books by title, author, genre, etc.
+
+Request Book Borrowing:
+
+Request to borrow a book (pending approval from the Librarian).
+
+View the status of borrow requests (pending, approved, rejected).
+
+View Issued Books:
+
+View a list of currently borrowed books and their due dates.
+
+See history of previously borrowed books.
+
+Return Borrowed Books:
+
+Return borrowed books and update their status in the system.
+
+View due dates and return dates to ensure books are returned on time.
+
+Technical Requirements:
+Backend:
+
+Use Golang for the backend development. The backend will handle API requests for managing books, users, and borrowing actions.
+
+PostgreSQL will be used to store book information, user details (Librarian/Student), borrowing records, etc.
+
+Implement JWT Authentication for secure login and role-based access control (RBAC).
+
+Use GORM or Go's native database package for interacting with PostgreSQL.
+
+Frontend:
+
+Use pure HTML for rendering the user interface.
+
+The frontend should include simple HTML forms for book addition, borrowing requests, and user registration.
+
+Render the views server-side using Go’s html/template package.
+
+The user interface should be simple and user-friendly, allowing librarians and students to perform tasks efficiently.
+
+Form Handling:
+
+Implement form validation both on the client-side (via HTML attributes) and server-side (Go validation) to ensure data integrity.
+
+Database Schema:
+
+The system should have tables for:
+
+Books: Store book details (ID, title, author, genre, availability).
+
+Users: Store user details (ID, name, contact info, role).
+
+Borrowing Records: Store information about borrowed books (user ID, book ID, borrowed date, return date, status).
+
+Additional Features (Optional):
+Search Functionality: Allow students and librarians to search books by title, author, or genre.
+
+Due Date Notifications: Send a simple notification (e.g., via email or message) when a book's due date is approaching.
+
+Pagination for Book Listings: For easier navigation, implement pagination when displaying large lists of books or borrowing records.
+
+Instructions:
+Ensure proper error handling for failed operations (e.g., adding a book, borrowing a book, etc.).
+
+Implement user authentication with JWT to ensure Librarians and Students have access to the appropriate sections of the system.
+
+Ensure the system is responsive, meaning it should work across desktop and mobile devices, even with basic HTML.
+

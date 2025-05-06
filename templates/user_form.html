@@ -1,0 +1,60 @@
+{{ define "content" }}
+<div class="user-form">
+    <div class="page-header">
+        <h2>{{ if index .Data "EditUser" }}Edit User{{ else }}Add New User{{ end }}</h2>
+        <a href="/users" class="btn">Back to Users</a>
+    </div>
+
+    <form action="{{ if index .Data "EditUser" }}/users/edit/{{ (index .Data "EditUser").ID }}{{ else }}/users/add{{ end }}" method="post">
+        <div class="form-group">
+            <label for="name">Full Name*</label>
+            <input type="text" id="name" name="name" value="{{ with index .Data "EditUser" }}{{ .Name }}{{ end }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email*</label>
+            <input type="email" id="email" name="email" value="{{ with index .Data "EditUser" }}{{ .Email }}{{ end }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password{{ if index .Data "EditUser" }} (Leave blank to keep unchanged){{ else }}*{{ end }}</label>
+            <input type="password" id="password" name="password" {{ if not (index .Data "EditUser") }}required{{ end }} minlength="6">
+            {{ if not (index .Data "EditUser") }}<small>Password must be at least 6 characters long</small>{{ end }}
+        </div>
+
+        <div class="form-group">
+            <label for="role">Role*</label>
+            <select id="role" name="role" required>
+                <option value="student" {{ with index .Data "EditUser" }}{{ if eq .Role "student" }}selected{{ end }}{{ end }}>Student</option>
+                <option value="librarian" {{ with index .Data "EditUser" }}{{ if eq .Role "librarian" }}selected{{ end }}{{ end }}>Librarian</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="student_id">Student ID (Required for students)</label>
+            <input type="text" id="student_id" name="student_id" value="{{ with index .Data "EditUser" }}{{ if .StudentID.Valid }}{{ .StudentID.String }}{{ end }}{{ end }}">
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone" value="{{ with index .Data "EditUser" }}{{ if .Phone.Valid }}{{ .Phone.String }}{{ end }}{{ end }}">
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ if index .Data "EditUser" }}Update User{{ else }}Add User{{ end }}</button>
+            <a href="/users" class="btn">Cancel</a>
+        </div>
+    </form>
+
+    {{ with index .Data "EditUser" }}
+    {{ if ne .ID $.User.ID }}
+    <div class="danger-zone">
+        <h3>Danger Zone</h3>
+        <form action="/users/delete/{{ .ID }}" method="post" onsubmit="return confirm('Are you sure you want to delete this user? This action cannot be undone.')">
+            <button type="submit" class="btn btn-danger">Delete User</button>
+        </form>
+    </div>
+    {{ end }}
+    {{ end }}
+</div>
+{{ end }}

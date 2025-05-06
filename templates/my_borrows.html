@@ -1,0 +1,111 @@
+{{ define "content" }}
+<div class="my-borrows">
+    <div class="page-header">
+        <h2>My Borrows</h2>
+    </div>
+
+    {{ if or .activeBorrows .pendingBorrows .pastBorrows }}
+    
+    {{ if .activeBorrows }}
+    <div class="section">
+        <h3>Currently Borrowed Books</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Book Title</th>
+                    <th>Borrow Date</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .activeBorrows }}
+                <tr class="{{ if .IsOverdue }}overdue{{ end }}">
+                    <td><a href="/books/{{ .Book.ID }}">{{ .Book.Title }}</a></td>
+                    <td>{{ .ApprovalDate.Format "Jan 02, 2006" }}</td>
+                    <td>{{ if .DueDate }}{{ .DueDate.Format "Jan 02, 2006" }}{{ else }}-{{ end }}</td>
+                    <td>
+                        {{ if .IsOverdue }}
+                        <span class="status-overdue">Overdue</span>
+                        {{ else }}
+                        <span class="status-approved">Active</span>
+                        {{ end }}
+                    </td>
+                    <td>
+                        <form action="/borrows/{{ .ID }}/return" method="post">
+                            <button type="submit" class="btn btn-sm">Return Book</button>
+                        </form>
+                    </td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </div>
+    {{ end }}
+
+    {{ if .pendingBorrows }}
+    <div class="section">
+        <h3>Pending Requests</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Book Title</th>
+                    <th>Request Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .pendingBorrows }}
+                <tr>
+                    <td><a href="/books/{{ .Book.ID }}">{{ .Book.Title }}</a></td>
+                    <td>{{ .RequestDate.Format "Jan 02, 2006" }}</td>
+                    <td><span class="status-pending">Pending</span></td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </div>
+    {{ end }}
+
+    {{ if .pastBorrows }}
+    <div class="section">
+        <h3>Borrow History</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Book Title</th>
+                    <th>Borrow Date</th>
+                    <th>Return Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .pastBorrows }}
+                <tr>
+                    <td><a href="/books/{{ .Book.ID }}">{{ .Book.Title }}</a></td>
+                    <td>{{ if .ApprovalDate }}{{ .ApprovalDate.Format "Jan 02, 2006" }}{{ else }}{{ .RequestDate.Format "Jan 02, 2006" }}{{ end }}</td>
+                    <td>{{ if .ReturnDate }}{{ .ReturnDate.Format "Jan 02, 2006" }}{{ else }}-{{ end }}</td>
+                    <td>
+                        {{ if eq .Status "returned" }}
+                        <span class="status-returned">Returned</span>
+                        {{ else if eq .Status "rejected" }}
+                        <span class="status-rejected">Rejected</span>
+                        {{ if .RejectionNote }}<br><small>{{ .RejectionNote }}</small>{{ end }}
+                        {{ end }}
+                    </td>
+                </tr>
+                {{ end }}
+            </tbody>
+        </table>
+    </div>
+    {{ end }}
+
+    {{ else }}
+    <div class="empty-state">
+        <p>You have no borrow records.</p>
+        <p>Browse our <a href="/books">catalog</a> to borrow books.</p>
+    </div>
+    {{ end }}
+</div>
+{{ end }}

@@ -1,0 +1,170 @@
+{{ define "content" }}
+<section class="welcome-section">
+    <div class="hero">
+        <h1>Welcome to the Library Management System</h1>
+        <p>A comprehensive solution for managing books, user accounts, and borrowing operations.</p>
+    </div>
+    
+    {{ if .User }}
+        <div class="user-welcome">
+            <h2>Welcome back, {{ .User.Name }}!</h2>
+            
+            {{ if .User.IsLibrarian }}
+                <!-- Librarian Dashboard -->
+                <div class="dashboard-section">
+                    <h3>Librarian Dashboard</h3>
+                    <div class="dashboard-widgets">
+                        <div class="widget">
+                            <h4>Pending Requests</h4>
+                            <div class="widget-content">
+                                <p class="widget-number">{{ index .Data "PendingCount" }}</p>
+                                <p>waiting for approval</p>
+                            </div>
+                            <a href="/borrows?type=pending" class="widget-link">Manage Requests</a>
+                        </div>
+                        
+                        <div class="widget">
+                            <h4>Overdue Books</h4>
+                            <div class="widget-content">
+                                <p class="widget-number">{{ index .Data "OverdueCount" }}</p>
+                                <p>past their due date</p>
+                            </div>
+                            <a href="/borrows?type=overdue" class="widget-link">View Overdue</a>
+                        </div>
+                    </div>
+                </div>
+                
+                {{ if index .Data "PendingRequests" }}
+                    <div class="section-container">
+                        <h3>Pending Borrow Requests</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Book</th>
+                                    <th>Request Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ range index .Data "PendingRequests" }}
+                                    <tr>
+                                        <td>{{ .User.Name }}</td>
+                                        <td>{{ .Book.Title }}</td>
+                                        <td>{{ formatDate .CreatedAt "Jan 02, 2006" }}</td>
+                                        <td>
+                                            <a href="/borrows" class="btn btn-sm">Manage</a>
+                                        </td>
+                                    </tr>
+                                {{ end }}
+                            </tbody>
+                        </table>
+                    </div>
+                {{ end }}
+                
+            {{ else }}
+                <!-- Student Dashboard -->
+                <div class="dashboard-section">
+                    <h3>Your Books</h3>
+                    <div class="dashboard-widgets">
+                        <div class="widget">
+                            <h4>Active Borrows</h4>
+                            <div class="widget-content">
+                                <p class="widget-number">{{ index .Data "ActiveCount" }}</p>
+                                <p>books currently borrowed</p>
+                            </div>
+                            <a href="/profile" class="widget-link">View Books</a>
+                        </div>
+                        
+                        <div class="widget">
+                            <h4>Pending Requests</h4>
+                            <div class="widget-content">
+                                <p class="widget-number">{{ index .Data "PendingCount" }}</p>
+                                <p>waiting for approval</p>
+                            </div>
+                            <a href="/profile" class="widget-link">View Requests</a>
+                        </div>
+                    </div>
+                </div>
+                
+                {{ if index .Data "ActiveBorrows" }}
+                    <div class="section-container">
+                        <h3>Your Currently Borrowed Books</h3>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Book</th>
+                                    <th>Borrowed Date</th>
+                                    <th>Due Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {{ range index .Data "ActiveBorrows" }}
+                                    <tr>
+                                        <td>{{ .Book.Title }}</td>
+                                        <td>{{ formatDate .BorrowDate "Jan 02, 2006" }}</td>
+                                        <td class="{{ if lt .DueDate now }}text-danger{{ end }}">
+                                            {{ formatDate .DueDate "Jan 02, 2006" }}
+                                        </td>
+                                        <td>
+                                            <a href="/borrows/{{ .ID }}/return" class="btn btn-sm">Return</a>
+                                        </td>
+                                    </tr>
+                                {{ end }}
+                            </tbody>
+                        </table>
+                    </div>
+                {{ end }}
+            {{ end }}
+        </div>
+    {{ else }}
+        <div class="public-info">
+            <div class="info-cards">
+                <div class="info-card">
+                    <h3>For Students</h3>
+                    <ul>
+                        <li>Browse our collection of books</li>
+                        <li>Request to borrow books</li>
+                        <li>Manage your borrowed books</li>
+                        <li>Track due dates</li>
+                    </ul>
+                    <a href="/login" class="btn">Login Now</a>
+                </div>
+                
+                <div class="info-card">
+                    <h3>For Librarians</h3>
+                    <ul>
+                        <li>Manage the book collection</li>
+                        <li>Process borrow requests</li>
+                        <li>Track overdue books</li>
+                        <li>Generate reports</li>
+                    </ul>
+                    <a href="/login" class="btn">Login Now</a>
+                </div>
+            </div>
+        </div>
+    {{ end }}
+    
+    {{ if index .Data "RecentBooks" }}
+        <div class="section-container">
+            <h3>Recent Books</h3>
+            <div class="book-grid">
+                {{ range index .Data "RecentBooks" }}
+                    <div class="book-card">
+                        <h4>{{ .Title }}</h4>
+                        <p class="author">by {{ .Author }}</p>
+                        <p class="description">{{ if .Description }}{{ .Description }}{{ else }}No description available.{{ end }}</p>
+                        <div class="book-footer">
+                            <span class="availability {{ if gt .Available 0 }}available{{ else }}unavailable{{ end }}">
+                                {{ if gt .Available 0 }}Available{{ else }}Not Available{{ end }}
+                            </span>
+                            <a href="/books/{{ .ID }}" class="btn btn-sm">View Details</a>
+                        </div>
+                    </div>
+                {{ end }}
+            </div>
+        </div>
+    {{ end }}
+</section>
+{{ end }}

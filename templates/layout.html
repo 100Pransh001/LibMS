@@ -1,0 +1,67 @@
+{{ define "layout" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Management System</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+                <h1>Library Management System</h1>
+            </div>
+            <nav>
+                <ul>
+                    {{ if .User }}
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/books">Books</a></li>
+                        
+                        {{ if .User.IsLibrarian }}
+                            <li><a href="/borrows">Borrows</a></li>
+                            <li><a href="/users">Users</a></li>
+                            <li><a href="/borrow-report">Reports</a></li>
+                        {{ else }}
+                            <li><a href="/profile">My Borrows</a></li>
+                        {{ end }}
+                        
+                        <li><a href="/profile">Profile</a></li>
+                        <li><a href="/logout">Logout</a></li>
+                    {{ else }}
+                        <li><a href="/login">Login</a></li>
+                        <li><a href="/register">Register</a></li>
+                    {{ end }}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            {{ if .Flash }}
+                <div class="alert alert-success">
+                    {{ .Flash }}
+                </div>
+            {{ end }}
+            
+            {{ if .Error }}
+                <div class="alert alert-error">
+                    {{ .Error }}
+                </div>
+            {{ end }}
+            
+            {{ template "content" . }}
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>&copy; {{ now.Year }} Library Management System</p>
+        </div>
+    </footer>
+</body>
+</html>
+{{ end }}

@@ -1,0 +1,102 @@
+{{ define "content" }}
+<div class="report-page">
+    <div class="page-header">
+        <h2>Borrowing Reports</h2>
+        <div class="header-actions">
+            <a href="/book-report" class="btn">Book Reports</a>
+            <a href="/borrows" class="btn">Manage Borrows</a>
+        </div>
+    </div>
+
+    <div class="report-dashboard">
+        <div class="stat-cards">
+            <div class="stat-card">
+                <h3>Active Borrows</h3>
+                <p class="stat-number">{{ .Data.ActiveCount }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Pending Borrows</h3>
+                <p class="stat-number">{{ .Data.PendingCount }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Overdue Borrows</h3>
+                <p class="stat-number">{{ .Data.OverdueCount }}</p>
+            </div>
+            <div class="stat-card">
+                <h3>Overdue %</h3>
+                <p class="stat-number">{{ .Data.OverduePercentage }}%</p>
+            </div>
+        </div>
+
+        <div class="report-section">
+            <h3>Monthly Borrow Statistics</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Month</th>
+                        <th>New Borrows</th>
+                        <th>Returns</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Data.MonthlyStats }}
+                    <tr>
+                        <td>{{ .Month }} {{ .Year }}</td>
+                        <td>{{ .NewBorrows }}</td>
+                        <td>{{ .Returns }}</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="report-section">
+            <h3>Top Borrowers</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Student ID</th>
+                        <th>Total Borrows</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Data.TopBorrowers }}
+                    <tr>
+                        <td><a href="/profile/{{ .UserID }}">{{ .Name }}</a></td>
+                        <td>{{ .StudentID }}</td>
+                        <td>{{ .BorrowCount }}</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+
+        {{ if .Data.OverdueBorrows }}
+        <div class="report-section">
+            <h3>Overdue Books</h3>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Student</th>
+                        <th>Due Date</th>
+                        <th>Days Overdue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ range .Data.OverdueBorrows }}
+                    <tr>
+                        <td>{{ .Book.Title }}</td>
+                        <td>{{ .User.Name }}</td>
+                        <td>{{ .DueDate.Format "Jan 02, 2006" }}</td>
+                        <td>{{ .DaysOverdue }}</td>
+                    </tr>
+                    {{ end }}
+                </tbody>
+            </table>
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}

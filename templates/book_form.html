@@ -1,0 +1,66 @@
+{{ define "content" }}
+<div class="book-form">
+    <div class="page-header">
+        <h2>{{ if .edit }}Edit Book{{ else }}Add New Book{{ end }}</h2>
+        <a href="/books" class="btn">Back to Books</a>
+    </div>
+
+    <form action="{{ if .edit }}/books/{{ .book.ID }}/edit{{ else }}/books/new{{ end }}" method="post">
+        <div class="form-group">
+            <label for="title">Title*</label>
+            <input type="text" id="title" name="title" value="{{ if .book }}{{ .book.Title }}{{ end }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="author">Author*</label>
+            <input type="text" id="author" name="author" value="{{ if .book }}{{ .book.Author }}{{ end }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="isbn">ISBN*</label>
+            <input type="text" id="isbn" name="isbn" value="{{ if .book }}{{ .book.ISBN }}{{ end }}" required>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group">
+                <label for="genre">Genre</label>
+                <input type="text" id="genre" name="genre" value="{{ if .book }}{{ .book.Genre }}{{ end }}">
+            </div>
+
+            <div class="form-group">
+                <label for="published_year">Published Year</label>
+                <input type="number" id="published_year" name="published_year" value="{{ if .book }}{{ .book.PublishedYear }}{{ end }}" min="1000" max="9999">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="publisher">Publisher</label>
+            <input type="text" id="publisher" name="publisher" value="{{ if .book }}{{ .book.Publisher }}{{ end }}">
+        </div>
+
+        <div class="form-group">
+            <label for="description">Description</label>
+            <textarea id="description" name="description" rows="4">{{ if .book }}{{ .book.Description }}{{ end }}</textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="total_copies">Total Copies*</label>
+            <input type="number" id="total_copies" name="total_copies" value="{{ if .book }}{{ .book.TotalCopies }}{{ else }}1{{ end }}" min="1" required>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">{{ if .edit }}Update Book{{ else }}Add Book{{ end }}</button>
+            <a href="/books" class="btn">Cancel</a>
+        </div>
+    </form>
+
+    {{ if and .edit .book }}
+    <div class="danger-zone">
+        <h3>Danger Zone</h3>
+        <form action="/books/{{ .book.ID }}/delete" method="post" onsubmit="return confirm('Are you sure you want to delete this book? This action cannot be undone.')">
+            <button type="submit" class="btn btn-danger">Delete Book</button>
+        </form>
+    </div>
+    {{ end }}
+</div>
+{{ end }}

@@ -1,0 +1,127 @@
+{{ define "content" }}
+<div class="borrow-history-page">
+    <div class="page-header">
+        <h2>Borrow History</h2>
+        <div class="header-actions">
+            <a href="/borrows" class="btn">Active Borrows</a>
+            <a href="/borrow-report" class="btn">Borrow Reports</a>
+        </div>
+    </div>
+
+    <div class="filter-box">
+        <form action="/borrow-history" method="get">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="book_id">Book:</label>
+                    <select id="book_id" name="book_id">
+                        <option value="0">All Books</option>
+                        {{ range .books }}
+                        <option value="{{ .ID }}" {{ if eq $.bookID (int .ID) }}selected{{ end }}>{{ .Title }}</option>
+                        {{ end }}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user_id">Student:</label>
+                    <select id="user_id" name="user_id">
+                        <option value="0">All Students</option>
+                        {{ range .users }}
+                        <option value="{{ .ID }}" {{ if eq $.userID (int .ID) }}selected{{ end }}>{{ .Name }} ({{ .StudentID }})</option>
+                        {{ end }}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="status">Status:</label>
+                    <select id="status" name="status">
+                        <option value="" {{ if eq .status "" }}selected{{ end }}>All Status</option>
+                        <option value="pending" {{ if eq .status "pending" }}selected{{ end }}>Pending</option>
+                        <option value="approved" {{ if eq .status "approved" }}selected{{ end }}>Approved</option>
+                        <option value="rejected" {{ if eq .status "rejected" }}selected{{ end }}>Rejected</option>
+                        <option value="returned" {{ if eq .status "returned" }}selected{{ end }}>Returned</option>
+                    </select>
+                </div>
+                
+                <div class="form-group form-actions">
+                    <button type="submit" class="btn">Filter</button>
+                    <a href="/borrow-history" class="btn btn-sm">Clear</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    {{ if len .borrows }}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Book</th>
+                <th>Student</th>
+                <th>Request Date</th>
+                <th>Approval Date</th>
+                <th>Return Date</th>
+                <th>Status</th>
+                <th>Approved By</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{ range .borrows }}
+            <tr class="{{ if eq .Status "pending" }}pending{{ else if .IsOverdue }}overdue{{ end }}">
+                <td><a href="/books/{{ .Book.ID }}">{{ .Book.Title }}</a></td>
+                <td><a href="/profile/{{ .User.ID }}">{{ .User.Name }}</a></td>
+                <td>{{ .RequestDate.Format "Jan 02, 2006" }}</td>
+                <td>{{ if .ApprovalDate }}{{ .ApprovalDate.Format "Jan 02, 2006" }}{{ else }}-{{ end }}</td>
+                <td>{{ if .ReturnDate }}{{ .ReturnDate.Format "Jan 02, 2006" }}{{ else }}-{{ end }}</td>
+                <td>
+                    {{ if eq .Status "pending" }}
+                    <span class="status-pending">Pending</span>
+                    {{ else if eq .Status "approved" }}
+                        {{ if .IsOverdue }}
+                        <span class="status-overdue">Overdue</span>
+                        {{ else }}
+                        <span class="status-approved">Approved</span>
+                        {{ end }}
+                    {{ else if eq .Status "rejected" }}
+                    <span class="status-rejected">Rejected</span>
+                    {{ if .RejectionNote }}<br><small>{{ .RejectionNote }}</small>{{ end }}
+                    {{ else if eq .Status "returned" }}
+                    <span class="status-returned">Returned</span>
+                    {{ end }}
+                </td>
+                <td>{{ if .ApprovedBy }}{{ .ApprovedBy.Name }}{{ else }}-{{ end }}</td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    {{ if gt .totalPages 1 }}
+    <div class="pagination">
+        {{ if gt .page 1 }}
+        <a href="/borrow-history?page={{ sub .page 1 }}&book_id={{ .bookID }}&user_id={{ .userID }}&status={{ .status }}" class="btn btn-sm">&laquo; Previous</a>
+        {{ end }}
+        
+        {{ $currentPage := .page }}
+        {{ range $i := seq 1 .totalPages }}
+            {{ if eq $i $currentPage }}
+            <span class="page-number current">{{ $i }}</span>
+            {{ else }}
+            <a href="/borrow-history?page={{ $i }}&book_id={{ $.bookID }}&user_id={{ $.userID }}&status={{ $.status }}" class="page-number">{{ $i }}</a>
+            {{ end }}
+        {{ end }}
+        
+        {{ if lt .page .totalPages }}
+        <a href="/borrow-history?page={{ add .page 1 }}&book_id={{ .bookID }}&user_id={{ .userID }}&status={{ .status }}" class="btn btn-sm">Next &raquo;</a>
+        {{ end }}
+    </div>
+    {{ end }}
+
+    {{ else }}
+    <div class="empty-state">
+        <p>No borrow records found.</p>
+        {{ if or .bookID .userID .status }}
+        <p>Try adjusting your filter criteria or <a href="/borrow-history">view all records</a>.</p>
+        {{ end }}
+    </div>
+    {{ end }}
+</div>
+{{ end }}
